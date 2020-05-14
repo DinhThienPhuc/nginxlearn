@@ -29,13 +29,8 @@ http {
     }
 
     location /test {
-      alias             SOURCE_ROOT/html2;
-      index             test.html;
-    }
-
-    location /err {
       alias             SOURCE_ROOT/html;
-      index             error.html;
+      index             test.html;
     }
 
     location /static {
@@ -49,5 +44,18 @@ http {
     location /balance-load {
       proxy_pass        http://backend/;
     }
+  }
+}
+
+stream {
+  upstream tft_api {
+    server  13.250.43.218:9000  weight=1;
+    server  13.250.43.218:5000  weight=1;
+    server  13.250.43.218:3000  backup;
+  }
+
+  server {
+    listen  8765;
+    proxy_pass  tft_api;
   }
 }
