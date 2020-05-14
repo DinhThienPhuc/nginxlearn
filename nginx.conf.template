@@ -1,0 +1,44 @@
+worker_rlimit_nofile 8192;
+
+events {
+  worker_connections  4096;
+}
+ 
+http {
+  server { 
+    listen              4869 default_server;
+    server_name         www.my-type.vn;
+
+    include             /usr/local/etc/nginx/mime.types;
+    default_type        application/octet-stream;
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+
+    access_log          SOURCE_ROOT/nginx-access.log;
+    error_log           SOURCE_ROOT/nginx-error.log;
+
+    location / {
+      alias             SOURCE_ROOT/html;
+      index             index.html;
+    }
+
+    location /test {
+      alias             SOURCE_ROOT/html2;
+      index             test.html;
+    }
+
+    location /err {
+      alias             SOURCE_ROOT/html;
+      index             error.html;
+    }
+
+    location /static {
+      alias             SOURCE_ROOT/static;
+    }
+
+    location /tft {
+      proxy_pass        http://13.250.43.218:3000/;
+    }
+  }
+}
