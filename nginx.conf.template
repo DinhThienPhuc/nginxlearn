@@ -5,6 +5,11 @@ events {
 }
  
 http {
+  upstream backend {
+    server  13.250.43.218:9000  weight=1;
+    server  13.250.43.218:3000  weight=2;
+  }
+
   server { 
     listen              4869 default_server;
     server_name         www.my-type.vn;
@@ -39,6 +44,10 @@ http {
 
     location /tft/home {
       proxy_pass        http://13.250.43.218:3000/;
+    }
+
+    location /balance-load {
+      proxy_pass        http://backend/;
     }
   }
 }
