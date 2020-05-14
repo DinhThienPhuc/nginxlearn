@@ -34,10 +34,10 @@ http {
     }
 
     location /static {
-      alias             SOURCE_ROOT/static;
+      root             SOURCE_ROOT;
     }
 
-    location /tft {
+    location /tft/home {
       proxy_pass        http://13.250.43.218:3000/;
     }
   }
