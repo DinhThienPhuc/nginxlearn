@@ -5,7 +5,7 @@ events {
 }
  
 http {
-  upstream backend {
+    upstream backend {
         server 0.0.0.1;   # just an invalid address as a place holder
 
         balancer_by_lua_file SOURCE_ROOT/balancer.lua;
