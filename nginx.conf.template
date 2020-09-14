@@ -30,7 +30,7 @@ http {
 
         location / {
             # make use of the upstream named "backend" defined above:
-            proxy_pass http://backend/fake;
+            proxy_pass http://backend/;
         }
     }
 
@@ -38,7 +38,7 @@ http {
         # this server is just for mocking up a backend peer here...
         listen 127.0.0.2:8080;
 
-        location = /fake {
+        location = / {
             echo "this is the fake backend peer...";
         }
     }
