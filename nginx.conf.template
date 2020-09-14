@@ -1,3 +1,6 @@
+user www-data;
+worker_processes  auto;
+pid /run/openresty.pid;
 worker_rlimit_nofile 8192;
 
 events {
