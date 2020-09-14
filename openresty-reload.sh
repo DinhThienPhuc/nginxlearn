@@ -2,4 +2,4 @@
 
 sed "s|SOURCE_ROOT|$(pwd)|" nginx.conf.template >nginx.conf
 /usr/local/openresty/bin/openresty -c $(pwd)/nginx.conf
-echo "**** Server at http://localhost:4869 restarted ... ****"
+echo "**** Server restarted ... ****"
