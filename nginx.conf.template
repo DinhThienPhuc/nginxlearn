@@ -16,6 +16,15 @@ http {
         # this is the real entry point
         listen 8888;
 
+        default_type        application/octet-stream;
+        sendfile            on;	
+        tcp_nopush          on;	
+        tcp_nodelay         on;	
+
+
+        access_log          SOURCE_ROOT/nginx-access.log;
+        error_log           SOURCE_ROOT/nginx-error.log;
+
         location / {
             # make use of the upstream named "backend" defined above:
             proxy_pass http://backend/fake;
