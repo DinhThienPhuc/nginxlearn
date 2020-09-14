@@ -30,6 +30,8 @@ http {
 
         location / {
             # make use of the upstream named "backend" defined above:
+
+            proxy_set_header Ip-Id 'ip-group';
             proxy_pass http://backend/;
         }
     }
@@ -39,7 +41,34 @@ http {
         listen 127.0.0.2:8080;
 
         location = / {
-            echo "this is the fake backend peer...";
+            echo "this is the fake backend peer...: port 8080";
+        }
+    }
+
+    server {
+        # this server is just for mocking up a backend peer here...
+        listen 127.0.0.2:8081;
+
+        location = / {
+            echo "this is the fake backend peer...: port 8081";
+        }
+    }
+
+    server {
+        # this server is just for mocking up a backend peer here...
+        listen 127.0.0.2:8082;
+
+        location = / {
+            echo "this is the fake backend peer...: port 8082";
+        }
+    }
+
+    server {
+        # this server is just for mocking up a backend peer here...
+        listen 127.0.0.2:8083;
+
+        location = / {
+            echo "this is the fake backend peer...: port 8083";
         }
     }
 }
