@@ -5,68 +5,109 @@ events {
 }
  
 http {
-  upstream backend {
+  upstream old_backend {
     server  13.250.43.218:9000  weight=1;
     server  13.250.43.218:3000  weight=2;
   }
 
-  server { 
-    listen              4869 default_server;
-    server_name         www.my-type.vn;
+  upstream backend {
+        server 0.0.0.1;   # just an invalid address as a place holder
 
-    include             /usr/local/etc/nginx/mime.types;
-    default_type        application/octet-stream;
-    sendfile            on;
-    tcp_nopush          on;
-    tcp_nodelay         on;
+        balancer_by_lua_block {
+            local balancer = require "ngx.balancer"
 
-    access_log          SOURCE_ROOT/nginx-access.log;
-    error_log           SOURCE_ROOT/nginx-error.log;
+            -- well, usually we calculate the peer's host and port
+            -- according to some balancing policies instead of using
+            -- hard-coded values like below
+            local host = "127.0.0.2"
+            local port = 8080
 
-    location / {
-      alias             SOURCE_ROOT/html;
-      index             index.html;
+            local ok, err = balancer.set_current_peer(host, port)
+            if not ok then
+                ngx.log(ngx.ERR, "failed to set the current peer: ", err)
+                return ngx.exit(500)
+            end
+        }
+
+        keepalive 10;  # connection pool
     }
 
-    location /test {
-      alias             SOURCE_ROOT/html;
-      index             test.html;
+    server { 
+        listen              4869 default_server;
+        server_name         www.my-type.vn;
+
+        include             /usr/local/etc/nginx/mime.types;
+        default_type        application/octet-stream;
+        sendfile            on;
+        tcp_nopush          on;
+        tcp_nodelay         on;
+
+        access_log          SOURCE_ROOT/nginx-access.log;
+        error_log           SOURCE_ROOT/nginx-error.log;
+
+        location / {
+        alias             SOURCE_ROOT/html;
+        index             index.html;
+        }
+
+        location /test {
+        alias             SOURCE_ROOT/html;
+        index             test.html;
+        }
+
+        location /static {
+        root             SOURCE_ROOT;
+        }
+
+        location /tft/home {
+        proxy_pass        http://13.250.43.218:3000/;
+        }
+
+        location /balance-load {
+        proxy_pass        http://backend/;
+        }
     }
 
-    location /static {
-      root             SOURCE_ROOT;
+    server {
+        # this is the real entry point
+        listen 80;
+
+        location / {
+            # make use of the upstream named "backend" defined above:
+            proxy_pass http://backend/fake;
+        }
     }
 
-    location /tft/home {
-      proxy_pass        http://13.250.43.218:3000/;
-    }
+    server {
+        # this server is just for mocking up a backend peer here...
+        listen 127.0.0.2:8080;
 
-    location /balance-load {
-      proxy_pass        http://backend/;
+        location = /fake {
+            echo "this is the fake backend peer...";
+        }
     }
-  }
 }
 
 stream {
-  upstream tft_api_tcp {
-    server  13.250.43.218:9000  weight=1;
-    server  13.250.43.218:5000  weight=1;
-    server  13.250.43.218:3000  backup;
-  }
+    upstream tft_api_tcp {
+        server  13.250.43.218:9000  weight=1;
+        server  13.250.43.218:5000  weight=1;
+        server  13.250.43.218:3000  backup;
+    }
 
-  upstream tft_api_udp {
-    server  13.250.43.218:9000  weight=3;
-    server  13.250.43.218:5000  weight=1;
-    server  13.250.43.218:3000  backup;
-  }
+    upstream tft_api_udp {
+        server  13.250.43.218:9000  weight=3;
+        server  13.250.43.218:5000  weight=1;
+        server  13.250.43.218:3000  backup;
+    }
 
-  server {
-    listen  8765;
-    proxy_pass  tft_api_tcp;
-  }
+    server {
+        listen  8765;
+        proxy_pass  tft_api_tcp;
+    }
 
-  server {
-    listen  1994 udp;
-    proxy_pass  tft_api_udp;
-  }
+    server {
+        listen  1994 udp;
+        proxy_pass  tft_api_udp;
+    }
 }
