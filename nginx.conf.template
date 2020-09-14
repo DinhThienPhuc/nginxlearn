@@ -29,7 +29,7 @@ http {
 
     server {
         # this is the real entry point
-        listen 80;
+        listen 8888;
 
         location / {
             # make use of the upstream named "backend" defined above:
