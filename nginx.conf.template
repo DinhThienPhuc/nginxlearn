@@ -9,7 +9,7 @@ events {
  
 http {
     upstream backend {
-        server 0.0.0.1;   # just an invalid address as a place holder
+        server 0.0.0.0;   # just an invalid address as a place holder
 
         balancer_by_lua_file SOURCE_ROOT/balancer.lua;
         keepalive 10;  # connection pool
@@ -17,7 +17,7 @@ http {
 
     server {
         # this is the real entry point
-        listen 8888;
+        listen 3579;
 
         default_type        application/octet-stream;
         sendfile            on;	
