@@ -36,7 +36,7 @@ http {
         listen              4869 default_server;
         server_name         www.my-type.vn;
 
-        include             /usr/local/etc/nginx/mime.types;
+        include             SOURCE_ROOT/assets/mime.types;
         default_type        application/octet-stream;
         sendfile            on;
         tcp_nopush          on;
