@@ -5,11 +5,6 @@ events {
 }
  
 http {
-  upstream old_backend {
-    server  13.250.43.218:9000  weight=1;
-    server  13.250.43.218:3000  weight=2;
-  }
-
   upstream backend {
         server 0.0.0.1;   # just an invalid address as a place holder
 
@@ -32,42 +27,6 @@ http {
         keepalive 10;  # connection pool
     }
 
-    server { 
-        listen              4869 default_server;
-        server_name         www.my-type.vn;
-
-        include             SOURCE_ROOT/assets/mime.types;
-        default_type        application/octet-stream;
-        sendfile            on;
-        tcp_nopush          on;
-        tcp_nodelay         on;
-
-        access_log          SOURCE_ROOT/nginx-access.log;
-        error_log           SOURCE_ROOT/nginx-error.log;
-
-        location / {
-        alias             SOURCE_ROOT/html;
-        index             index.html;
-        }
-
-        location /test {
-        alias             SOURCE_ROOT/html;
-        index             test.html;
-        }
-
-        location /static {
-        root             SOURCE_ROOT;
-        }
-
-        location /tft/home {
-        proxy_pass        http://13.250.43.218:3000/;
-        }
-
-        location /balance-load {
-        proxy_pass        http://backend/;
-        }
-    }
-
     server {
         # this is the real entry point
         listen 80;
@@ -85,29 +44,5 @@ http {
         location = /fake {
             echo "this is the fake backend peer...";
         }
-    }
-}
-
-stream {
-    upstream tft_api_tcp {
-        server  13.250.43.218:9000  weight=1;
-        server  13.250.43.218:5000  weight=1;
-        server  13.250.43.218:3000  backup;
-    }
-
-    upstream tft_api_udp {
-        server  13.250.43.218:9000  weight=3;
-        server  13.250.43.218:5000  weight=1;
-        server  13.250.43.218:3000  backup;
-    }
-
-    server {
-        listen  8765;
-        proxy_pass  tft_api_tcp;
-    }
-
-    server {
-        listen  1994 udp;
-        proxy_pass  tft_api_udp;
     }
 }
