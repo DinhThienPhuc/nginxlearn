@@ -31,7 +31,10 @@ http {
         location / {
             # make use of the upstream named "backend" defined above:
 
-            proxy_set_header Ip-Id 'ip-group';
+            access_by_lua_block {
+              ngx.ctx.ip_id = 'ip-id'
+            }
+
             proxy_pass http://backend/;
         }
     }
